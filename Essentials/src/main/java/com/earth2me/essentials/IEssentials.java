@@ -6,7 +6,6 @@ import com.earth2me.essentials.api.IWarps;
 import com.earth2me.essentials.commands.IEssentialsCommand;
 import com.earth2me.essentials.commands.PlayerNotFoundException;
 import com.earth2me.essentials.perm.PermissionsHandler;
-import com.earth2me.essentials.updatecheck.UpdateChecker;
 import com.earth2me.essentials.userstorage.IUserMap;
 import net.ess3.nms.refl.providers.ReflOnlineModeProvider;
 import net.ess3.provider.ContainerProvider;
@@ -95,8 +94,6 @@ public interface IEssentials extends Plugin {
     Kits getKits();
 
     RandomTeleport getRandomTeleport();
-
-    UpdateChecker getUpdateChecker();
 
     BukkitTask runTaskAsynchronously(Runnable run);
 

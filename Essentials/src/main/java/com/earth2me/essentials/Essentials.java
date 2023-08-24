@@ -29,7 +29,6 @@ import com.earth2me.essentials.items.AbstractItemDb;
 import com.earth2me.essentials.items.CustomItemResolver;
 import com.earth2me.essentials.items.FlatItemDb;
 import com.earth2me.essentials.items.LegacyItemDb;
-import com.earth2me.essentials.metrics.MetricsWrapper;
 import com.earth2me.essentials.perm.PermissionsDefaults;
 import com.earth2me.essentials.perm.PermissionsHandler;
 import com.earth2me.essentials.signs.SignBlockListener;
@@ -38,7 +37,6 @@ import com.earth2me.essentials.signs.SignPlayerListener;
 import com.earth2me.essentials.textreader.IText;
 import com.earth2me.essentials.textreader.KeywordReplacer;
 import com.earth2me.essentials.textreader.SimpleTextInput;
-import com.earth2me.essentials.updatecheck.UpdateChecker;
 import com.earth2me.essentials.userstorage.ModernUserMap;
 import com.earth2me.essentials.utils.FormatUtil;
 import com.earth2me.essentials.utils.VersionUtil;
@@ -144,7 +142,6 @@ import static com.earth2me.essentials.I18n.tl;
 public class Essentials extends JavaPlugin implements net.ess3.api.IEssentials {
     private static final Logger BUKKIT_LOGGER = Logger.getLogger("Essentials");
     private static Logger LOGGER = null;
-    private final transient TNTExplodeListener tntListener = new TNTExplodeListener();
     private final transient Set<String> vanishedPlayers = new LinkedHashSet<>();
     private transient ISettings settings;
     private transient Jails jails;
@@ -163,7 +160,6 @@ public class Essentials extends JavaPlugin implements net.ess3.api.IEssentials {
     private transient ExecuteTimer execTimer;
     private transient MailService mail;
     private transient I18n i18n;
-    private transient MetricsWrapper metrics;
     private transient EssentialsTimer timer;
     private transient SpawnerItemProvider spawnerItemProvider;
     private transient SpawnerBlockProvider spawnerBlockProvider;
@@ -184,7 +180,6 @@ public class Essentials extends JavaPlugin implements net.ess3.api.IEssentials {
     private transient SignDataProvider signDataProvider;
     private transient Kits kits;
     private transient RandomTeleport randomTeleport;
-    private transient UpdateChecker updateChecker;
     private transient Map<String, IEssentialsCommand> commandMap = new HashMap<>();
 
     static {
@@ -473,16 +468,6 @@ public class Essentials extends JavaPlugin implements net.ess3.api.IEssentials {
             PermissionsDefaults.registerAllBackDefaults();
             PermissionsDefaults.registerAllHatDefaults();
 
-            updateChecker = new UpdateChecker(this);
-            runTaskAsynchronously(() -> {
-                getLogger().log(Level.INFO, tl("versionFetching"));
-                for (String str : updateChecker.getVersionMessages(false, true)) {
-                    getLogger().log(getSettings().isUpdateCheckEnabled() ? Level.WARNING : Level.INFO, str);
-                }
-            });
-
-            metrics = new MetricsWrapper(this, 858, true);
-
             execTimer.mark("Init(External)");
 
             final String timeroutput = execTimer.end();
@@ -541,13 +526,8 @@ public class Essentials extends JavaPlugin implements net.ess3.api.IEssentials {
         final EssentialsEntityListener entityListener = new EssentialsEntityListener(this);
         pm.registerEvents(entityListener, this);
 
-        final EssentialsWorldListener worldListener = new EssentialsWorldListener(this);
-        pm.registerEvents(worldListener, this);
-
         final EssentialsServerListener serverListener = new EssentialsServerListener(this);
         pm.registerEvents(serverListener, this);
-
-        pm.registerEvents(tntListener, this);
 
         if (recipeBookEventProvider != null) {
             pm.registerEvents(recipeBookEventProvider, this);
@@ -719,7 +699,6 @@ public class Essentials extends JavaPlugin implements net.ess3.api.IEssentials {
 
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String commandLabel, final String[] args) {
-        metrics.markCommand(command.getName(), true);
         return onCommandEssentials(sender, command, commandLabel, args, Essentials.class.getClassLoader(), "com.earth2me.essentials.commands.Command", "essentials.", null);
     }
 
@@ -914,11 +893,6 @@ public class Essentials extends JavaPlugin implements net.ess3.api.IEssentials {
     @Override
     public RandomTeleport getRandomTeleport() {
         return randomTeleport;
-    }
-
-    @Override
-    public UpdateChecker getUpdateChecker() {
-        return updateChecker;
     }
 
     @Deprecated
@@ -1347,24 +1321,6 @@ public class Essentials extends JavaPlugin implements net.ess3.api.IEssentials {
             } else {
                 return new LegacyItemDb(this);
             }
-        }
-    }
-
-    private static class EssentialsWorldListener implements Listener, Runnable {
-        private transient final IEssentials ess;
-
-        EssentialsWorldListener(final IEssentials ess) {
-            this.ess = ess;
-        }
-
-        @EventHandler(priority = EventPriority.LOW)
-        public void onWorldLoad(final WorldLoadEvent event) {
-            PermissionsDefaults.registerBackDefaultFor(event.getWorld());
-        }
-
-        @Override
-        public void run() {
-            ess.reload();
         }
     }
 }

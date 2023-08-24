@@ -279,9 +279,6 @@ public class Commandessentials extends EssentialsCommand {
         final JsonObject essData = new JsonObject();
         essData.addProperty("version", ess.getDescription().getVersion());
         final JsonObject updateData = new JsonObject();
-        updateData.addProperty("id", ess.getUpdateChecker().getVersionIdentifier());
-        updateData.addProperty("branch", ess.getUpdateChecker().getVersionBranch());
-        updateData.addProperty("dev", ess.getUpdateChecker().isDevBuild());
         essData.add("update-data", updateData);
         final JsonObject econLayer = new JsonObject();
         econLayer.addProperty("enabled", !ess.getSettings().isEcoDisabled());
@@ -821,13 +818,6 @@ public class Commandessentials extends EssentialsCommand {
         if (VersionUtil.getSupportStatusClass() != null) {
             sender.sendMessage(ChatColor.RED + tl("serverUnsupportedClass", VersionUtil.getSupportStatusClass()));
         }
-
-        sender.sendMessage(tl("versionFetching"));
-        ess.runTaskAsynchronously(() -> {
-            for (String str : ess.getUpdateChecker().getVersionMessages(true, true)) {
-                sender.sendMessage(str);
-            }
-        });
     }
 
     @Override

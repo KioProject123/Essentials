@@ -430,14 +430,6 @@ public class EssentialsPlayerListener implements Listener, FakeAccessor {
                     }
                 }
 
-                if (user.isAuthorized("essentials.updatecheck")) {
-                    ess.runTaskAsynchronously(() -> {
-                        for (String str : ess.getUpdateChecker().getVersionMessages(false, false)) {
-                            user.sendMessage(str);
-                        }
-                    });
-                }
-
                 if (user.isAuthorized("essentials.fly.safelogin")) {
                     user.getBase().setFallDistance(0);
                     if (LocationUtil.shouldFly(ess, user.getLocation())) {
